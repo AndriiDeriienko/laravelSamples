@@ -1,16 +1,22 @@
 const usersLiId = 'users-li';
 const postsLiId = 'posts-li';
 
-const usersTableAreaId = 'usersTable';
-const postsTableAreaId = 'postsTable';
+const usersTableAreaId = '#usersTable';
+const postsTableAreaId = '#postsTable';
+
+const userNameFieldId = '#userModal #name';
+const userEmailFieldId = '#userModal #email';
+const userPasswordFieldId = '#userModal #password';
 
 let state = {
     usersPage: {
+        indexUri: '/api/users',
         lastId: 0,
         sortField: 'id',
         sortDirection: 'ASC'
     },
     postsPage: {
+        indexUri: '/api/posts',
         lastId: 0,
         sortField: 'id',
         sortDirection: 'ASC'
@@ -26,6 +32,9 @@ function switchActiveMenuItem() {
 
         if (id === usersLiId) {
             deactivateId = postsLiId;
+            renderUsers(0);
+        } else {
+            renderPosts(0);
         }
 
         $('#' + deactivateId).removeClass('active');
@@ -33,25 +42,32 @@ function switchActiveMenuItem() {
     }
 }
 
-function renderUsers() {
-    const query = '?last_displayed_id=' + state.usersPage.lastId
-        + '&sort_field=' + state.usersPage.sortField
-        + '&sort_direction=' + state.usersPage.sortDirection;
+function renderUsers(lastId) {
+    const query = new URLSearchParams({
+        last_displayed_id: lastId,
+        sort_field: state.usersPage.sortField,
+        sort_direction: state.usersPage.sortDirection,
+    });
 
     $.ajax({
-        url: '/api/users' + query,
+        url: state.usersPage.indexUri + '?' + query.toString(),
         method: 'GET',
         success: function (users) {
-            const selector = '#' + usersTableAreaId;
             let tableHtml = generateUsersTableHeader();
 
-            for (let user of users) {
+            users.forEach(function (user, key) {
                 tableHtml += generateUsersTableRecord(user);
-            }
+
+                if (key === (users.length - 1)) {
+                    state.usersPage.lastId = user.id;
+                }
+            });
 
             tableHtml += generateUsersTableFooter();
-            $(selector).html(tableHtml);
-            $(selector).show();
+            $(usersTableAreaId).html(tableHtml);
+            $(postsTableAreaId).hide();
+            $(usersTableAreaId).show();
+            applyListeners();
         },
         error: function () {
             alert('Something went wrong.')
@@ -59,69 +75,32 @@ function renderUsers() {
     })
 }
 
-function generateUsersTableHeader() {
-    return `
-        <table class="table">
-            <thead class="primary">
-            <tr>
-                <th scope="col">Id</th>
-                <th scope="col">Name</th>
-                <th scope="col">Email</th>
-                <th scope="col">Created_at</th>
-                <th scope="col">Updated_at</th>
-                <th scope="col">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-    `;
-}
-
-function generateUsersTableRecord(user) {
-    return `
-        <tr>
-            <th scope="row">${user.id}</th>
-            <td>${user.name}</td>
-            <td>${user.email}</td>
-            <td>${user.created_at}</td>
-            <td>${user.updated_at}</td>
-            <td>
-                <div class="row">
-                    <button data-user-id="${user.id}" class="btn btn-info edit-user-button">Edit</button>&nbsp;&nbsp;
-                    <button data-user-id="${user.id}" class="btn btn-danger delete-user-button">Delete</button>
-                </div>
-            </td>
-        </tr>
-    `;
-}
-
-function generateUsersTableFooter() {
-    return `
-            </tbody>
-        </table>
-
-        <button type="button" data-toggle="modal" data-target="#userModal" class="btn btn-dark add-user-button" id="add-user">Add User</button>
-    `;
-}
-
-function renderPosts() {
-    const query = '?last_displayed_id=' + state.postsPage.lastId
-        + '&sort_field=' + state.postsPage.sortField
-        + '&sort_direction=' + state.postsPage.sortDirection;
+function renderPosts(lastId) {
+    const query = new URLSearchParams({
+        last_displayed_id: lastId,
+        sort_field: state.postsPage.sortField,
+        sort_direction: state.postsPage.sortDirection,
+    });
 
     $.ajax({
-        url: '/api/posts' + query,
+        url: state.postsPage.indexUri + '?' + query.toString(),
         method: 'GET',
         success: function (posts) {
-            const selector = '#' + postsTableAreaId;
             let tableHtml = generatePostsTableHeader();
 
-            for (let post of posts) {
+            posts.forEach(function (post, key) {
                 tableHtml += generatePostsTableRecord(post);
-            }
+
+                if (key === (posts.length - 1)) {
+                    state.postsPage.lastId = post.id;
+                }
+            });
 
             tableHtml += generatePostsTableFooter();
-            $(selector).html(tableHtml);
-            $(selector).show();
+            $(postsTableAreaId).html(tableHtml);
+            $(usersTableAreaId).hide();
+            $(postsTableAreaId).show();
+            applyListeners();
         },
         error: function () {
             alert('Something went wrong.')
@@ -129,55 +108,34 @@ function renderPosts() {
     })
 }
 
-function generatePostsTableHeader() {
-    return `
-        <table class="table">
-            <thead class="primary">
-            <tr>
-                <th scope="col">Id</th>
-                <th scope="col">UserId</th>
-                <th scope="col">Title</th>
-                <th scope="col">Content</th>
-                <th scope="col">Created_at</th>
-                <th scope="col">Updated_at</th>
-                <th scope="col">Action</th>
-            </tr>
-            </thead>
-            <tbody>
-    `;
+function onAddUserClick() {
+    $('button.create-user-button').show();
+    $('button.save-user-changes-button').hide();
+    $('#user-model-title').html('Create User');
+    $(userNameFieldId).val('Enter name');
+    $(userEmailFieldId).val('Enter email');
+    $(userPasswordFieldId).val('Enter password');
+    $(userNameFieldId).val('');
+    $(userEmailFieldId).val('');
+    $(userPasswordFieldId).val('');
 }
 
-function generatePostsTableRecord(post) {
-    return `
-        <tr>
-            <th scope="row">${post.id}</th>
-            <td>${post.user_id}</td>
-            <td>${post.title}</td>
-            <td>${post.content}</td>
-            <td>${post.created_at}</td>
-            <td>${post.updated_at}</td>
-            <td>
-                <div class="row">
-                    <button data-post-id="${post.id}" class="btn btn-info edit-post-button">Edit</button>&nbsp;&nbsp;
-                    <button data-post-id="${post.id}" class="btn btn-danger delete-post-button">Delete</button>
-                </div>
-            </td>
-        </tr>
-    `;
+function onEditUserClick() {
+    $('button.create-user-button').hide();
+    $('button.save-user-changes-button').show();
+    $('#user-model-title').html('Edit User');
+    $(userNameFieldId).val($(this).data('user-name'));
+    $(userEmailFieldId).val($(this).data('user-email'));
+    $(userPasswordFieldId).val('Enter password');
+    $(userPasswordFieldId).val('');
 }
 
-function generatePostsTableFooter() {
-    return `
-            </tbody>
-        </table>
-
-        <button type="button" data-toggle="modal" data-target="#postModal"
-        class="btn btn-dark add-post-button" id="add-post">Add Post</button>
-    `;
+function applyListeners() {
+    $('button.add-user-button').click(onAddUserClick);
+    $('button.edit-user-button').click(onEditUserClick);
 }
 
 $(document).ready(function () {
     $('li.nav-item').click(switchActiveMenuItem);
-    renderUsers();
-    renderPosts();
+    renderUsers(0);
 });

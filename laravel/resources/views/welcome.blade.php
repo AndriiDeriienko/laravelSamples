@@ -41,35 +41,72 @@
             </ul>
         </div>
     </nav>
+
     <br>
     <br>
 
     <div id="usersTable"></div>
-
-    <br>
     <div id="postsTable"></div>
 
     <div class="modal fade" id="userModal" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Create User</h5>
+                    <h5 id="user-model-title" class="modal-title">Create User</h5>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <label for="inputName">Name</label>
-                    <input type="text" class="form-control" id="inputName" placeholder="Enter Name">
-                    <label for="inputEmail">Email</label>
-                    <input type="email" class="form-control" id="inputEmail" placeholder="Enter Email">
-                    <label for="inputPassword">Password</label>
-                    <input type="password" class="form-control" id="inputPassword" placeholder="Enter Password">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="name"
+                            name="name"
+                            placeholder="Enter name"
+                            autocomplete="off"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email address</label>
+                        <input
+                            type="email"
+                            class="form-control"
+                            id="email"
+                            name="email"
+                            placeholder="Enter email"
+                            autocomplete="false"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input
+                            type="password"
+                            class="form-control"
+                            id="password"
+                            name="password"
+                            placeholder="Password"
+                            autocomplete="off"
+                        >
+                    </div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+                    <button
+                        type="button"
+                        class="btn btn-primary create-user-button"
+                        style="display: none;"
+                    >Create</button>
+                    <button
+                        type="button"
+                        data-user-id="0"
+                        class="btn btn-primary save-user-changes-button"
+                        style="display: none;"
+                    >Edit</button>
                 </div>
             </div>
         </div>
@@ -85,10 +122,6 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <label for="inputTitle">Title</label>
-                    <input type="text" class="form-control" id="inputTitle" placeholder="Enter Title">
-                    <label for="inputContent">Content</label>
-                    <textarea class="form-control" id="inputContent" rows="3">Add Content</textarea>
 
                 </div>
                 <div class="modal-footer">
@@ -117,6 +150,7 @@
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
     crossorigin="anonymous"
 ></script>
+<script src="{{ \Illuminate\Support\Facades\URL::asset('js/templates.js') }}"></script>
 <script src="{{ \Illuminate\Support\Facades\URL::asset('js/custom-spa.js') }}"></script>
 </body>
 </html>
