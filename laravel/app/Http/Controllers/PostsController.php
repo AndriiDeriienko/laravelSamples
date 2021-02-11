@@ -7,15 +7,9 @@ use Illuminate\Http\Request;
 
 class PostsController extends AbstractRestController
 {
-    /** @var PostRepository */
-    protected PostRepository $postRepository;
-
-    /** @var Request */
-    protected Request $request;
-
-    public function __construct(PostRepository $abstractRepository, Request $request)
+    public function __construct(PostRepository $postRepository, Request $request)
     {
-        parent::__construct($abstractRepository, $request);
+        parent::__construct($postRepository, $request);
     }
 
     /**

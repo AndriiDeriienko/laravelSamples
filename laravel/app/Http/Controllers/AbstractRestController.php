@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\AbstractRepository;
+use App\Services\RequestTransformer;
+use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -48,14 +50,14 @@ abstract class AbstractRestController
      */
     public function store(): JsonResponse
     {
-        $data = $this->request->all();
-        $validator = Validator::make($data, $this->getValidationRules());
+        $validator = Validator::make($this->request->all(), $this->getValidationRules());
 
         if ($validator->fails()) {
             return new JsonResponse(['errors' => 'Invalid data'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $model = $this->repository->create($data);
+        RequestTransformer::transform($this->request, $this->getStoreRequestDataTransformers());
+        $model = $this->repository->create($this->request->all());
 
         if (!$model) {
             return new JsonResponse(['errors' => 'Model was not created'], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -85,14 +87,14 @@ abstract class AbstractRestController
      */
     public function update(int $id): JsonResponse
     {
-        $data = $this->request->all();
-        $validator = Validator::make($data, $this->getValidationRules());
+        $validator = Validator::make($this->request->all(), $this->getValidationRules());
 
         if ($validator->fails()) {
             return new JsonResponse(['errors' => 'Invalid data'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $model = $this->repository->update($id, $data);
+        RequestTransformer::transform($this->request, $this->getUpdateRequestDataTransformers());
+        $model = $this->repository->update($id, $this->request->all());
 
         if (!$model) {
             return new JsonResponse(['errors' => 'Model was not updated.'], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -126,6 +128,22 @@ abstract class AbstractRestController
             'sort_direction' => 'nullable|string',
             'last_displayed_id' => 'nullable|integer',
         ];
+    }
+
+    /**
+     * @return Closure[]
+     */
+    protected function getStoreRequestDataTransformers(): array
+    {
+        return [];
+    }
+
+    /**
+     * @return Closure[]
+     */
+    protected function getUpdateRequestDataTransformers(): array
+    {
+        return [];
     }
 
     /**
