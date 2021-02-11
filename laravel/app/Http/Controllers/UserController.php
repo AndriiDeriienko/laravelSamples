@@ -2,77 +2,72 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
 use App\Models\User;
-use App\Services\UserValidator;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use App\Repositories\UserRepository;
-use Symfony\Component\HttpFoundation\Request;
-use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 
 class UserController extends Controller
 {
-    /**
-     * @var UserRepository
-     */
-    private $userRepository;
+    /** @var UserRepository */
+    private UserRepository $userRepository;
 
-    public function __construct(UserRepository $userRepository)
+    /** @var Request */
+    private Request $request;
+
+    public function __construct(UserRepository $userRepository, Request $request)
     {
         $this->userRepository = $userRepository;
+        $this->request = $request;
     }
 
     /**
-     * @param Request $request
-     * @return array
-     */
-    public function userToArray(Request $request): array
-    {
-        return [
-            'name' => $request->get('name'),
-            'email' => $request->get('email'),
-            'email_verified_at' => (string)Carbon::now(),
-            'created_at' => (string)Carbon::now(),
-            'updated_at' =>(string)Carbon::now(),
-        ];
-    }
-    /**
-     * @todo: add paginate
      * @return JsonResponse
      */
     public function index(): JsonResponse
     {
-        $users = $this->userRepository->all();
+        $validator = Validator::make($this->request->all(), [
+            'sort_field' => 'nullable|string',
+            'sort_direction' => 'nullable|string',
+            'last_displayed_id' => 'nullable|integer',
+        ]);
 
-        return new JsonResponse($users->toArray());
+        if ($validator->fails()) {
+            return new JsonResponse(['errors' => 'Invalid data'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $sortField = $this->request->input('sort_field', null);
+        $sortDirection = $this->request->input('sort_direction', null);
+        $lastDisplayedId = (int)$this->request->input('last_displayed_id', 0);
+
+        $users = $this->userRepository->sortAndPaginate($sortField, $sortDirection, $lastDisplayedId);
+
+        return new JsonResponse($users);
     }
 
     /**
-     * @param Request $request
-     * @param UserValidator $storeUserValidator
      * @return JsonResponse
      */
-    public function store(Request $request, UserValidator $storeUserValidator): JsonResponse
+    public function store(): JsonResponse
     {
-        $userData = [
-            'name' => (string)$request->get('name'),
-            'email' => (string)$request->get('email'),
-            'password' => Hash::make($request->get('password')),
-        ];
-        try {
-            $userData = $storeUserValidator->validate();
-        } catch (ValidationException $e) {
-            return new JsonResponse($e->errors());
+        $data = $this->request->all();
+        $validator = Validator::make($data, $this->getValidationRules());
+
+        if ($validator->fails()) {
+            return new JsonResponse(['errors' => 'Invalid data'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $created = $this->userRepository->create($userData);
+        $data['password'] = Hash::make($data['password']);
+        $user = $this->userRepository->create($data);
 
-        if (is_null($created)) {
-            return new JsonResponse(['errors' =>'User was not created']);
+        if (!$user) {
+            return new JsonResponse(['errors' => 'User was not created'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        return new JsonResponse($created);
+        return new JsonResponse($user->toArray());
     }
 
     /**
@@ -85,33 +80,33 @@ class UserController extends Controller
         $user = $this->userRepository->find($id);
 
         if (!$user) {
-            return new JsonResponse(['errors' => 'User not found']);
+            return new JsonResponse(['errors' => 'User not found'], Response::HTTP_NOT_FOUND);
         }
 
-
-        return new JsonResponse($user);
+        return new JsonResponse($user->toArray());
     }
 
     /**
      * @param int $id
-     * @param Request $request
      * @return JsonResponse
      */
-    public function update(int $id, Request $request): JsonResponse
+    public function update(int $id): JsonResponse
     {
-        $decodePassword = Hash::make($request->get('password'));
-        $userData = [
-            'name' => (string)$request->get('name'),
-            'email' => (string)$request->get('email'),
-            'password' => (string)$decodePassword,
-        ];
-        $updated = $this->userRepository->update($id, $userData);
+        $data = $this->request->all();
+        $validator = Validator::make($data, $this->getValidationRules());
 
-        if (!$updated) {
-            return new JsonResponse(['errors' =>'User was not updated.']);
+        if ($validator->fails()) {
+            return new JsonResponse(['errors' => 'Invalid data'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        return new JsonResponse(['message' => 'User updated']);
+        $data['password'] = Hash::make($data['password']);
+        $user = $this->userRepository->update($id, $data);
+
+        if (!$user) {
+            return new JsonResponse(['errors' => 'User was not updated.'], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        return new JsonResponse($user->toArray());
     }
 
     /**
@@ -120,12 +115,24 @@ class UserController extends Controller
      */
     public function delete(int $id): JsonResponse
     {
-        $deletedUser = $this->userRepository->find($id);
+        $deleted = $this->userRepository->delete($id);
 
-        if (!$deletedUser) {
-            return new JsonResponse(['errors' => 'User not found']);
+        if (!$deleted) {
+            return new JsonResponse(['errors' => 'User was not deleted'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        return new JsonResponse(['message' => 'User deleted successfully']);
+        return new JsonResponse(['message' => 'User was deleted successfully']);
+    }
+
+    /**
+     * @return string[]
+     */
+    private function getValidationRules(): array
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|unique:users|max:255',
+            'password' => 'required|string|min:8',
+        ];
     }
 }

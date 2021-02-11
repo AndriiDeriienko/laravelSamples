@@ -1,14 +1,27 @@
 <?php
 
+/** @noinspection PhpMissingFieldTypeInspection */
+
 namespace App\Models;
 
+use App\Interfaces\SortableModelInterface;
 use Carbon\Carbon;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Symfony\Component\HttpFoundation\Request;
 
-class User extends Authenticatable
+/**
+ * Class User
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property string $password
+ * @property DateTimeInterface $created_at
+ * @property DateTimeInterface updated_at
+ * @package App\Models
+ */
+class User extends Authenticatable implements SortableModelInterface
 {
     use HasFactory, Notifiable;
 
@@ -30,15 +43,39 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
     /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
+     * @return array
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public function toArray(): array
+    {
+        $arrayData =  parent::toArray();
+        $arrayData['created_at'] = $this->created_at->format(Carbon::DEFAULT_TO_STRING_FORMAT);
+        $arrayData['updated_at'] = $this->updated_at->format(Carbon::DEFAULT_TO_STRING_FORMAT);
+
+        return $arrayData;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getSortableFields(): array
+    {
+        return [
+            'id',
+            'name',
+            'email',
+            'created_at',
+            'updated_at'
+        ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultSortField(): string
+    {
+        return $this->getKeyName();
+    }
 }

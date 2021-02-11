@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Interfaces\SortableModelInterface;
 use Exception;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -11,8 +12,18 @@ use Illuminate\Database\Eloquent\Model;
 
 abstract class AbstractRepository
 {
+    private const ASC_DIRECTION = 'ASC';
+    private const DESC_DIRECTION = 'DESC';
+    private const ALLOWED_DIRECTIONS = [
+        self::ASC_DIRECTION,
+        self::DESC_DIRECTION
+    ];
+
     /** @var Model */
-    protected $model;
+    protected Model $model;
+
+    /** @var int */
+    protected int $recordPerPage = 10;
 
     /**
      * @param Container $container
@@ -20,8 +31,46 @@ abstract class AbstractRepository
      */
     public function __construct(Container $container)
     {
-        $model = $this->model();
-        $this->model = $container->make($model);
+        $modelClass = $this->getModelClass();
+        $model = $container->make($modelClass);
+        $this->model = $model;
+    }
+
+    /**
+     * @param int $id
+     * @return Model|null
+     */
+    public function find(int $id): ?Model
+    {
+        return $this->getBuilder()->find($id);
+    }
+
+    /**
+     * @param string|null $sortField
+     * @param string|null $sortDirection
+     * @param int $lastDisplayedId
+     * @return Collection|Model[]
+     */
+    public function sortAndPaginate(
+        ?string $sortField = null,
+        ?string $sortDirection = null,
+        int $lastDisplayedId = 0
+    ): iterable {
+        $builder = $this->getBuilder();
+        $sortField = $this->validateSortField($sortField);
+
+        if ($sortField) {
+            $sortDirection = $this->getSortDirection($sortDirection);
+            $builder = $builder->orderBy($sortField, $sortDirection);
+        }
+
+        $primaryKey = $this->model->getKeyName();
+
+        return $builder
+            ->where($primaryKey, '>', $lastDisplayedId)
+            ->limit($this->recordPerPage)
+            ->get()
+        ;
     }
 
     /**
@@ -31,7 +80,7 @@ abstract class AbstractRepository
     public function create(array $data): ?Model
     {
         try {
-            $model = $this->model->create($data);
+            $model = $this->getBuilder()->create($data);
         } catch (Exception $exception) {
             return null;
         }
@@ -42,23 +91,23 @@ abstract class AbstractRepository
     /**
      * @param int $id
      * @param array $data
-     * @return bool
+     * @return Model|null
      */
-    public function update(int $id, array $data): bool
+    public function update(int $id, array $data): ?Model
     {
         $model = $this->find($id);
 
-        if (is_null($model)) {
-            return false;
+        if (!$model) {
+            return null;
         }
 
         try {
-            $updated = $model->update($data);
+            $model->update($data);
         } catch (Exception $exception) {
-            return false;
+            return null;
         }
 
-        return $updated;
+        return $model;
     }
 
     /**
@@ -67,14 +116,14 @@ abstract class AbstractRepository
      */
     public function delete(int $id): bool
     {
-        $entity = $this->find($id);
+        $model = $this->find($id);
 
-        if (is_null($entity)) {
+        if (!$model) {
             return false;
         }
 
         try {
-            $deleted = (bool)$entity->delete();
+            $deleted = (bool)$model->delete();
         } catch (Exception $exception) {
             $deleted = false;
         }
@@ -83,32 +132,55 @@ abstract class AbstractRepository
     }
 
     /**
-     * @param int $id
-     * @return Model|null
+     * @return Collection|Model[]
      */
-    public function find(int $id): ?Model
+    public function all(): iterable
     {
-        return $this->model->find($id);
+        return $this->getBuilder()->get();
     }
 
     /**
-     * @return Builder|Model
+     * @return Builder
      */
-    public function getBuilder()
+    private function getBuilder(): Builder
     {
         return $this->model->newModelQuery();
     }
 
     /**
-     * @return Collection|Model[]
+     * @param string|null $sortDirection
+     * @return string
      */
-    public function all(): iterable
+    private function getSortDirection(?string $sortDirection): string
     {
-        return $this->model->all();
+        $sortDirection = strtoupper($sortDirection);
+
+        if (in_array($sortDirection, self::ALLOWED_DIRECTIONS)) {
+            return $sortDirection;
+        }
+
+        return self::ASC_DIRECTION;
+    }
+
+    /**
+     * @param string|null $sortField
+     * @return string|null
+     */
+    private function validateSortField(?string $sortField): ?string
+    {
+        if (!$sortField || !$this->model instanceof SortableModelInterface) {
+            return null;
+        }
+
+        if (!in_array($sortField, $this->model->getSortableFields())) {
+            return $this->model->getDefaultSortField();
+        }
+
+        return $sortField;
     }
 
     /**
      * @return string
      */
-    abstract public function model(): string;
+    abstract public function getModelClass(): string;
 }
