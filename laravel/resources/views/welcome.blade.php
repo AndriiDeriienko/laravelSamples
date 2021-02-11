@@ -11,6 +11,12 @@
         crossorigin="anonymous"
     >
 
+    <style>
+        .pointer {
+            cursor: pointer;
+        }
+    </style>
+
     <title>Laravel Trial</title>
 </head>
 <body>
@@ -18,7 +24,7 @@
 <div class="container-fluid">
     <br>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">Laravel Trial</a>
+        <span class="navbar-brand pointer">Laravel Trial</span>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -27,10 +33,10 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li id="users-li" class="nav-item active">
-                    <a class="nav-link" href="#">Users</a>
+                    <span class="nav-link pointer">Users</span>
                 </li>
                 <li id="posts-li" class="nav-item">
-                    <a class="nav-link" href="#">Posts</a>
+                    <span class="nav-link pointer">Posts</span>
                 </li>
             </ul>
         </div>
@@ -55,11 +61,11 @@
                 </div>
                 <div class="modal-body">
                     <label for="inputName">Name</label>
-                    <input type="text"class="form-control" id="inputName" placeholder="Enter Name">
+                    <input type="text" class="form-control" id="inputName" placeholder="Enter Name">
                     <label for="inputEmail">Email</label>
-                    <input type="email"class="form-control" id="inputEmail" placeholder="Enter Email">
+                    <input type="email" class="form-control" id="inputEmail" placeholder="Enter Email">
                     <label for="inputPassword">Password</label>
-                    <input type="password"class="form-control" id="inputPassword" placeholder="Enter Password">
+                    <input type="password" class="form-control" id="inputPassword" placeholder="Enter Password">
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -80,7 +86,7 @@
                 </div>
                 <div class="modal-body">
                     <label for="inputTitle">Title</label>
-                    <input type="text"class="form-control" id="inputTitle" placeholder="Enter Title">
+                    <input type="text" class="form-control" id="inputTitle" placeholder="Enter Title">
                     <label for="inputContent">Content</label>
                     <textarea class="form-control" id="inputContent" rows="3">Add Content</textarea>
 
