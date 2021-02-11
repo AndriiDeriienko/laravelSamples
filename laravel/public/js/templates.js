@@ -26,6 +26,20 @@ function generateUsersTableFooter() {
             data-target="#userModal"
             class="btn btn-dark add-user-button"
         >Add User</button>
+
+        <nav id="users-table-pagination">
+            <ul class="pagination justify-content-center">
+                <li id="users-prev-page" class="page-item disabled">
+                    <span class="page-link pointer"> << </span>
+                </li>
+                <li id="users-current-page" class="page-item">
+                    <span class="page-link pointer">1</span>
+                </li>
+                <li id="users-next-page" class="page-item">
+                    <span class="page-link pointer"> >> </span>
+                </li>
+            </ul>
+        </nav>
     `;
 }
 
@@ -51,6 +65,24 @@ function generateUsersTableRecord(user) {
                 </div>
             </td>
         </tr>
+    `;
+}
+
+function generateUsersTablePagination() {
+    return `
+        <nav>
+            <ul class="pagination">
+                <li class="page-item disabled">
+                    <span class="page-link pointer">Previous</span>
+                </li>
+                <li class="page-item">
+                    <span id="users-current-page" class="page-link pointer">1</span>
+                </li>
+                <li class="page-item">
+                    <span class="page-link pointer">Next</span>
+                </li>
+            </ul>
+        </nav>
     `;
 }
 

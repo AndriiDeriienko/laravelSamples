@@ -8,6 +8,8 @@ const userNameFieldId = '#userModal #name';
 const userEmailFieldId = '#userModal #email';
 const userPasswordFieldId = '#userModal #password';
 
+const currentUsersPageSelector = '#users-current-page span';
+
 let state = {
     usersPage: {
         indexUri: '/api/users',
@@ -133,6 +135,21 @@ function onEditUserClick() {
 function applyListeners() {
     $('button.add-user-button').click(onAddUserClick);
     $('button.edit-user-button').click(onEditUserClick);
+
+    $('#users-table-pagination li.page-item').click(function () {
+        const liId = $(this).attr('id');
+        let page = $(currentUsersPageSelector).html();
+
+        if (liId === 'users-prev-page') {
+            page--;
+        }
+
+        if (liId === 'users-next-page') {
+            page++;
+        }
+
+        $(currentUsersPageSelector).html(page);
+    });
 }
 
 $(document).ready(function () {
