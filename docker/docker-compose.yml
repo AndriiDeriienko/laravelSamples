@@ -1,0 +1,55 @@
+version: '3'
+
+volumes:
+  db-volume:
+
+services:
+  db:
+    build:
+      context: ../db
+      dockerfile: Dockerfile
+      args:
+        MYSQL_DATABASE: "${MYSQL_DATABASE:-db}"
+        MYSQL_USER: "${MYSQL_USER:-homestead}"
+        MYSQL_PASSWORD: "${MYSQL_PASSWORD:-secret}"
+        MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-secret}"
+        SYSTEM_TZ: "${SYSTEM_TZ:-Europe/Kiev}"
+    environment:
+      TZ: "${SYSTEM_TZ:-Europe/Kiev}"
+    ports:
+      - 3306:3306
+    volumes:
+      - db-volume:/var/lib/mysql2
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+      - db
+    environment:
+      MYSQL_USER: "${MYSQL_USER:-homestead}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD:-secret}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:-secret}"
+      TZ: "${SYSTEM_TZ:-Europe/Kiev}"
+    ports:
+      - 8080:80
+
+  baseimg:
+    build:
+      context: images/base
+      dockerfile: Dockerfile
+      args:
+        SYSTEM_TZ: "${SYSTEM_TZ:-Europe/Kiev}"
+    image: baseimg
+
+  laravel:
+    build:
+      context: ../laravel
+      dockerfile: ../docker/images/laravel/Dockerfile
+#    env_file:
+#      - ../laravel/.env
+    depends_on:
+      - db
+    ports:
+      - 80:80
+    volumes:
+      - ../laravel:/var/www/html
