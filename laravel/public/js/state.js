@@ -4,9 +4,9 @@ const postsLiId = 'posts-li';
 const usersTableAreaId = '#usersTable';
 const postsTableAreaId = '#postsTable';
 
-const userNameFieldId = '#userModal #name';
-const userEmailFieldId = '#userModal #email';
-const userPasswordFieldId = '#userModal #password';
+const userNameFieldId = '#userModal #user-name';
+const userEmailFieldId = '#userModal #user-email';
+const userPasswordFieldId = '#userModal #user-password';
 
 const currentUsersPageSelector = '#users-current-page span';
 const usersPrevPageSelector = '#users-prev-page';

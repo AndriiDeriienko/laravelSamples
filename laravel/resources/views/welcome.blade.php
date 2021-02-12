@@ -64,7 +64,7 @@
                         <input
                             type="text"
                             class="form-control"
-                            id="name"
+                            id="user-name"
                             name="name"
                             placeholder="Enter name"
                             autocomplete="off"
@@ -75,7 +75,7 @@
                         <input
                             type="email"
                             class="form-control"
-                            id="email"
+                            id="user-email"
                             name="email"
                             placeholder="Enter email"
                             autocomplete="false"
@@ -86,7 +86,7 @@
                         <input
                             type="password"
                             class="form-control"
-                            id="password"
+                            id="user-password"
                             name="password"
                             placeholder="Password"
                             autocomplete="off"

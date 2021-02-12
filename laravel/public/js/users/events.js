@@ -20,6 +20,10 @@ function onEditUserClick() {
     $(userPasswordFieldId).val('');
 }
 
+function onCreateUserButtonClick() {
+    const userData = {};
+}
+
 function onUsersPageItemClick() {
     if ($(this).hasClass('disabled')) {
         return;
