@@ -150,7 +150,14 @@
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
     crossorigin="anonymous"
 ></script>
-<script src="{{ \Illuminate\Support\Facades\URL::asset('js/templates.js') }}"></script>
+
+<script src="{{ \Illuminate\Support\Facades\URL::asset('js/state.js') }}"></script>
+<script src="{{ \Illuminate\Support\Facades\URL::asset('js/users/templates.js') }}"></script>
+<script src="{{ \Illuminate\Support\Facades\URL::asset('js/users/actions.js') }}"></script>
+<script src="{{ \Illuminate\Support\Facades\URL::asset('js/users/events.js') }}"></script>
+<script src="{{ \Illuminate\Support\Facades\URL::asset('js/posts/templates.js') }}"></script>
+<script src="{{ \Illuminate\Support\Facades\URL::asset('js/posts/actions.js') }}"></script>
+<script src="{{ \Illuminate\Support\Facades\URL::asset('js/posts/events.js') }}"></script>
 <script src="{{ \Illuminate\Support\Facades\URL::asset('js/custom-spa.js') }}"></script>
 </body>
 </html>

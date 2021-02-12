@@ -37,11 +37,15 @@ abstract class AbstractRestController
 
         $sortField = $this->request->input('sort_field', null);
         $sortDirection = $this->request->input('sort_direction', null);
-        $lastDisplayedId = (int)$this->request->input('last_displayed_id', 0);
+        $page = (int)$this->request->input('page', 1);
 
-        $models = $this->repository->sortAndPaginate($sortField, $sortDirection, $lastDisplayedId);
+        $models = $this->repository->sortAndPaginate($sortField, $sortDirection, $page);
+        $lastPage = $this->repository->getLastPage();
 
-        return new JsonResponse($models);
+        return new JsonResponse([
+            'models' => $models,
+            'lastPage' => $lastPage
+        ]);
     }
 
 
@@ -126,7 +130,7 @@ abstract class AbstractRestController
         return [
             'sort_field' => 'nullable|string',
             'sort_direction' => 'nullable|string',
-            'last_displayed_id' => 'nullable|integer',
+            'page' => 'nullable|integer',
         ];
     }
 

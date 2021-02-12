@@ -48,29 +48,39 @@ abstract class AbstractRepository
     /**
      * @param string|null $sortField
      * @param string|null $sortDirection
-     * @param int $lastDisplayedId
+     * @param int $page
      * @return Collection|Model[]
      */
     public function sortAndPaginate(
         ?string $sortField = null,
         ?string $sortDirection = null,
-        int $lastDisplayedId = 0
+        int $page = 1
     ): iterable {
         $builder = $this->getBuilder();
         $sortField = $this->validateSortField($sortField);
+        $page = $this->validatePage($page);
+        $offset = ($page - 1) * $this->recordPerPage;
 
         if ($sortField) {
             $sortDirection = $this->getSortDirection($sortDirection);
             $builder = $builder->orderBy($sortField, $sortDirection);
         }
 
-        $primaryKey = $this->model->getKeyName();
-
         return $builder
-            ->where($primaryKey, '>', $lastDisplayedId)
+            ->offset($offset)
             ->limit($this->recordPerPage)
             ->get()
         ;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLastPage(): int
+    {
+        $recordsNumber = $this->getBuilder()->count();
+
+        return (int)ceil($recordsNumber / $this->recordPerPage);
     }
 
     /**
@@ -177,6 +187,19 @@ abstract class AbstractRepository
         }
 
         return $sortField;
+    }
+
+    /**
+     * @param int $page
+     * @return int
+     */
+    private function validatePage(int $page): int
+    {
+        if ($page < 1) {
+            return 1;
+        }
+
+        return $page;
     }
 
     /**
