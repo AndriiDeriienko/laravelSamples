@@ -28,9 +28,26 @@ function onUsersPageItemClick() {
         page--;
     }
 
-    if (liId === 'users-next-page') {
+    if (liId === 'users-next-page' && page < state.usersPage.lastPage) {
         page++;
     }
 
+    if (page > 1) {
+        $(usersPrevPageSelector).removeClass('disabled');
+    }
+
+    if (page < state.usersPage.lastPage) {
+        $(usersNextPageSelector).removeClass('disabled');
+    }
+
+    if (page === 1) {
+        $(usersPrevPageSelector).addClass('disabled');
+    }
+
+    if (page === state.usersPage.lastPage) {
+        $(usersNextPageSelector).addClass('disabled');
+    }
+
+    renderUsers(page);
     $(currentUsersPageSelector).html(page);
 }

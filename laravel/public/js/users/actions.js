@@ -1,6 +1,8 @@
-function renderUsers(lastId) {
+function renderUsers(page = 1) {
+    state.usersPage.page = page;
+
     const query = new URLSearchParams({
-        last_displayed_id: lastId,
+        page: page,
         sort_field: state.usersPage.sortField,
         sort_direction: state.usersPage.sortDirection,
     });
@@ -9,6 +11,7 @@ function renderUsers(lastId) {
         url: state.usersPage.indexUri + '?' + query.toString(),
         method: 'GET',
         success: function (response) {
+            state.usersPage.lastPage = response.lastPage;
             let tableHtml = generateUsersTableHeader();
 
             response.models.forEach(function (user) {

@@ -9,6 +9,8 @@ const userEmailFieldId = '#userModal #email';
 const userPasswordFieldId = '#userModal #password';
 
 const currentUsersPageSelector = '#users-current-page span';
+const usersPrevPageSelector = '#users-prev-page';
+const usersNextPageSelector = '#users-next-page';
 
 let state = {
     usersPage: {

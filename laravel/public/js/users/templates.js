@@ -33,7 +33,7 @@ function generateUsersTableFooter() {
                     <span class="page-link pointer"> << </span>
                 </li>
                 <li id="users-current-page" class="page-item">
-                    <span class="page-link pointer">1</span>
+                    <span class="page-link pointer">${state.usersPage.page}</span>
                 </li>
                 <li id="users-next-page" class="page-item">
                     <span class="page-link pointer"> >> </span>

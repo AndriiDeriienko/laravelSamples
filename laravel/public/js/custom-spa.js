@@ -7,10 +7,10 @@ function switchActiveMenuItem() {
 
         if (id === usersLiId) {
             deactivateId = postsLiId;
-            renderUsers(0);
+            renderUsers();
         } else {
             deactivateId = usersLiId;
-            renderPosts(0);
+            renderPosts();
         }
 
         $('#' + deactivateId).removeClass('active');
@@ -27,5 +27,5 @@ function applyListeners() {
 $(document).ready(function () {
     $('li.nav-item').click(switchActiveMenuItem);
 
-    renderUsers(0);
+    renderUsers();
 });
