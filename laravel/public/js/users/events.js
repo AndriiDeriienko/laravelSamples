@@ -21,6 +21,10 @@ function onEditUserClick() {
 }
 
 function onUsersPageItemClick() {
+    if ($(this).hasClass('disabled')) {
+        return;
+    }
+
     const liId = $(this).attr('id');
     let page = $(currentUsersPageSelector).html();
 
