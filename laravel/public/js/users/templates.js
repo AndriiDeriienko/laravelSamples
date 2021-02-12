@@ -16,6 +16,9 @@ function generateUsersTableHeader() {
 }
 
 function generateUsersTableFooter() {
+    const prevPageDisabled = state.usersPage.page === 1 ? 'disabled' : '';
+    const nextPageDisabled = state.usersPage.page === state.usersPage.lastPage ? 'disabled' : '';
+
     return `
             </tbody>
         </table>
@@ -29,13 +32,13 @@ function generateUsersTableFooter() {
 
         <nav id="users-table-pagination">
             <ul class="pagination justify-content-center">
-                <li id="users-prev-page" class="page-item disabled">
+                <li id="users-prev-page" class="page-item ${prevPageDisabled}">
                     <span class="page-link pointer"> << </span>
                 </li>
                 <li id="users-current-page" class="page-item">
                     <span class="page-link pointer">${state.usersPage.page}</span>
                 </li>
-                <li id="users-next-page" class="page-item">
+                <li id="users-next-page" class="page-item ${nextPageDisabled}">
                     <span class="page-link pointer"> >> </span>
                 </li>
             </ul>
